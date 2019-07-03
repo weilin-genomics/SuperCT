@@ -3,7 +3,7 @@
 import sys,getopt
 
 usage='''Usage: python pred_types.py -i <input_dge.csv> -o <cell_type_output.csv> -p -m <model.h5> -s <human or mouse>
-	or: python pred_types.py --input_file=<input_dge.csv> --output_file=<cell_type_output.csv> --plot_hist --model=<model.h5> --specie=<human or mouse> 
+	or: python pred_types.py --input_file=<input_dge.csv> --output_file=<cell_type_output.csv> --plot_hist --model=<model.h5> --species=<human or mouse> 
 	'''
 try:
 	opts,args = getopt.getopt(sys.argv[1:], "hpi:o:m:s:", ["help",'plot','input_file=','output_file=','model=','specie='])
