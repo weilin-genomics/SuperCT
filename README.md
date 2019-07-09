@@ -1,5 +1,5 @@
 # SuperCT
-This project is for the development of a supervised classifier of cell types for single-cell RNAseq digital expression profiles.
+This project is for the development of a supervised classifier of cell types based on the single-cell RNAseq digital expression profiles.
 
 You may run the standalone command as follow:
 
