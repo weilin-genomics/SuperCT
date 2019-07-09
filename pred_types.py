@@ -2,11 +2,11 @@
 # coding: utf-8
 import sys,getopt
 
-usage='''Usage: python pred_types.py -i <input_dge.csv> -o <cell_type_output.csv> -p -m <model.h5> -s <human or mouse>
-	or: python pred_types.py --input_file=<input_dge.csv> --output_file=<cell_type_output.csv> --plot_hist --model=<model.h5> --specie=<human or mouse> 
+usage='''Usage: python pred_types.py -i <input_dge.csv> -o <cell_type_output.csv> -p -m <model.h5> -s <human or mouse> -t <id2type.csv>
+	or: python pred_types.py --input_file=<input_dge.csv> --output_file=<cell_type_output.csv> --plot_hist --model=<model.h5> --species=<human or mouse> --types=<id2type.csv>
 	'''
 try:
-	opts,args = getopt.getopt(sys.argv[1:], "hpi:o:m:s:", ["help",'plot','input_file=','output_file=','model=','specie='])
+	opts,args = getopt.getopt(sys.argv[1:], "hpi:o:m:s:t:", ["help",'plot','input_file=','output_file=','model=','species=','types='])
 except getopt.GetoptError:
 	print('Error\n',usage)
 	sys.exit(2)
@@ -14,7 +14,8 @@ output_file='cell_type_output.csv'
 input_file=''
 model_file=''
 plot_hist=False
-specie=''
+species=''
+types=''
 for opt,arg in opts:
 	if opt in ("-h", "--help"):
 		print(usage)
@@ -27,8 +28,10 @@ for opt,arg in opts:
 		model_file = arg	
 	elif opt in ('-p','--plot_hist'):
 		plot_hist=True
-	elif opt in ('-s','--specie'):
-		specie = arg
+	elif opt in ('-s','--species'):
+		species = arg
+	elif opt in ('-t','--types'):
+		types=arg
 if len(input_file)==0:
 	print('expression file must be supplied!')
 	print(usage)
@@ -43,10 +46,10 @@ import pandas as pd
 from keras.models import load_model
 import matplotlib.pyplot as plt
 
-def load_genes(genes_file,specie):
-	if specie=='human':
+def load_genes(genes_file,species):
+	if species=='human':
 		genes_used = pd.read_csv(genes_file,usecols=[0],header = None)
-	elif specie=='mouse':
+	elif species=='mouse':
 		genes_used = pd.read_csv(genes_file,usecols=[1],header = None)
 	genes_used = genes_used.values.tolist()
 	for i,g in enumerate(genes_used):
@@ -65,28 +68,28 @@ def load_data(file_name,genes_used):
 		data=data.loc[genes_used,:]
 		print('Warning:',genes_not_found,'not found in your expression file,please check them.but the prediction will go on by setting these genes with zero count.')
 	return data
-def predict_type(model,data,cell_type):
-    data = data > 0
-    data = data.astype(np.uint8)   
-    result = model.predict(data.values.T)
-    result_df = pd.DataFrame(result)
-    result_df.columns = list(cell_type.values())
-    cell_type_pred = [cell_type[i] for i in list(np.argmax(result, axis = 1))]
-    result_df["pred_type"] = cell_type_pred
-    return result_df
-
-cell_type=dict({
-    0:'Acinar',1:'Adipocyte',2:'Alveoli',3:'At2',4:'Bcell',5:'Cardiomyocyte',6:'Cartilage',7:'Cumulus',
-    8:'Dendritic',9:'Endothelial',10:'Enterocyte',11:'Epithelial',12:'Embryo_Stem',13:'Granulocyte',14:'Leydig',
-    15:'Luteal',16:'Megakaryocyte',17:'Mesenchymal_Stem',18:'Microglia',19:'Mono/Macrophage',20:'Multipotent',21:'Myelinating',
-    22:'Neuron',23:'Nkcell',24:'Osteoblast',25:'Unknown',26:'Proximal_tubule',27:'Radial',28:'Redblood',29:'Schwann',
-    30:'Sertoli',31:'Smooth_muscle',32:'Spermatid',33:'Stomach',34:'Stromal',35:'Tcell',36:'Trophoblast',37:'Troph_Stem'})
+def load_cell_types(types):
+	cell_types={}
+	all_types=pd.read_csv(types)
+	for i,each in enumerate(all_types['celltype']):
+		cell_types[i]=each
+	return cell_types
+def predict_type(model,data,cell_types):
+	data = data > 0
+	data = data.astype(np.uint8)
+	result = model.predict(data.values.T)
+	result_df = pd.DataFrame(result)
+	result_df.columns = list(cell_types.values())
+	cell_type_pred = [cell_types[i] for i in list(np.argmax(result, axis = 1))]
+	result_df["pred_type"] = cell_type_pred
+	return result_df
 
 model=load_model(model_file)
-genes_used=load_genes('inthomgenes.csv',specie)
+genes_used=load_genes('inthomgenes.csv',species)
 data=load_data(input_file,genes_used)
+cell_types=load_cell_types(types)
 
-result_df=predict_type(model,data,cell_type)
+result_df=predict_type(model,data,cell_types)
 result_out=pd.DataFrame({'cell_id': data.columns,'pred_type':result_df['pred_type']})
 result_out.to_csv(output_file,index=False)
 
