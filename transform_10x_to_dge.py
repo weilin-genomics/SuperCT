@@ -27,7 +27,7 @@ import pandas as pd
 data=mmread(matrix_file)
 data=pd.DataFrame(data.todense())
 
-genes=pd.read_csv(genes_file,header=None,usecols=[0],sep='\t')
+genes=pd.read_csv(genes_file,header=None,usecols=[1],sep='\t')
 genes_list=[each[0] for i,each in enumerate(genes.values.tolist())]
 barc=pd.read_csv(barc_file,header=None,usecols=[0])
 barc_list=[each[0] for i,each in enumerate(barc.values.tolist())]
