@@ -57,6 +57,7 @@ def load_genes(genes_file,species):
 	return genes_used
 def load_data(file_name,genes_used):
 	data = pd.read_csv(file_name, header = 0, index_col = 0)
+	data = data[~data.index.duplicated(keep='first')]
 	genes_valid=np.intersect1d(data.index,genes_used)
 	if len(genes_valid)==len(genes_used):
 		data=data.loc[genes_used,:]
@@ -100,5 +101,5 @@ if plot_hist:
 		d.update({i:res_list.count(i)})
 	plt.bar(d.keys(),d.values())
 	plt.title('Frequency of predicted cell types')
-	plt.xticks(rotation=45)
+	plt.xticks(rotation=90)
 	plt.savefig('predicted_types.pdf',bbox_inches='tight')
