@@ -8,3 +8,5 @@ python pred_types.py -i <input_dge.csv> -o <cell_type_output.csv> -p -m <model.h
 To prepare input_dge.csv from 10xGenomics output files for the above prediction command, you may run the command as follow:
 
  python transform_10x_to_dge.py -m <matrix.mtx> -g <genes.tsv> -b <barcodes.tsv> -o <transformed_dge.csv>
+ 
+ The R version of SuperCT is now availabe in https://github.com/weilin-genomics/rSuperCT
